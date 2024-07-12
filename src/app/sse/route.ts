@@ -1,6 +1,12 @@
 import type { NextRequest } from "next/server";
 
+import { PHASE_PRODUCTION_BUILD } from "next/constants";
+
 export async function GET(request: NextRequest) {
+    if (process.env.NEXT_PHASE === PHASE_PRODUCTION_BUILD) {
+        return new Response(null, { status: 204 });
+    }
+
     const responseStream = new TransformStream();
     const encoder = new TextEncoder();
     const writer = responseStream.writable.getWriter();
