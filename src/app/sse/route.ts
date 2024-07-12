@@ -4,6 +4,7 @@ import { PHASE_PRODUCTION_BUILD } from "next/constants";
 
 export async function GET(request: NextRequest) {
     if (process.env.NEXT_PHASE === PHASE_PRODUCTION_BUILD) {
+        console.log(`Current phase is ${process.env.NEXT_PHASE}, skipping pre-rendering`);
         return new Response(null, { status: 204 });
     }
 
