@@ -30,14 +30,24 @@ export default function Page() {
             setMessages((messages) => [...messages, event.data]);
         };
 
-        eventSource.onerror = (error) => {
-            console.error("Error:", error);
+        eventSource.onerror = (event) => {
+            console.error("Error:", event);
+
+            if (eventSource.readyState === EventSource.CLOSED) {
+                console.log("Connection closed");
+                setIsConnectionOpen(false);
+            }
         };
 
-        return () => {
+        const cleanup = () => {
             console.log("Closing connection");
             eventSource.close();
+            window.removeEventListener("beforeunload", cleanup);
         };
+
+        window.addEventListener("beforeunload", cleanup);
+
+        return cleanup;
     }, [isConnectionOpen]);
 
     useEffect(() => {
