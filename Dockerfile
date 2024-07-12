@@ -41,7 +41,6 @@ FROM node:20-alpine AS runner
 WORKDIR /app
 
 # Copy built assets from the builder stage
-COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 
