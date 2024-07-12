@@ -73,6 +73,7 @@ export async function GET(request: NextRequest) {
         }, 3000);
 
         request.signal.onabort = async () => {
+            console.log(`Abort signal received`);
             await closeStream();
             return new Response(null, { status: 204 });
         };
