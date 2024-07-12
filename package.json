@@ -1,25 +1,22 @@
 {
-    "name": "my-nextjs-project",
+    "name": "@raflymln/unnecessary-quotes",
     "version": "1.0.0",
-    "description": "NextJS project template by Rafly Maulana",
-    "main": "index.js",
-    "repository": "https://github.com/raflymln/nextjs-template.git",
-    "bugs": "https://github.com/raflymln/nextjs-template",
+    "description": "SSE POC for Next.js 14 App Directory",
+    "repository": "https://github.com/raflymln/unnecessary-quotes.git",
     "author": {
         "name": "Rafly Maulana",
         "email": "mraflymaulana@gmail.com",
         "url": "https://raflymaulana.me"
     },
     "homepage": "https://raflymaulana.me",
-    "license": "MIT",
+    "license": "UNLICENSED",
     "private": true,
     "contributors": [],
     "scripts": {
-        "dev": "start http://localhost:3000 && next dev",
+        "dev": "next dev",
         "build": "next build",
         "start": "next start",
-        "lint": "next lint",
-        "git:prepare": "husky install"
+        "lint": "next lint"
     },
     "prettier": "@raflymln/prettier-config",
     "eslintConfig": {
@@ -28,15 +25,12 @@
         ]
     },
     "dependencies": {
-        "@prisma/client": "^5.13.0",
         "@tailwindcss/typography": "^0.5.13",
         "clsx": "^2.1.1",
-        "next": "^14.2.3",
+        "next": "^14.2.5",
         "react": "^18.3.1",
         "react-dom": "^18.3.1",
-        "swr": "^2.2.5",
-        "tailwind-merge": "^2.3.0",
-        "zod": "^3.23.8"
+        "tailwind-merge": "^2.4.0"
     },
     "devDependencies": {
         "@raflymln/eslint-config": "^1.2.1",
@@ -46,14 +40,9 @@
         "@types/react-dom": "18.3.0",
         "autoprefixer": "^10.4.19",
         "eslint": "9.2.0",
-        "husky": "^9.0.11",
-        "lint-staged": "^15.2.2",
-        "postcss": "^8.4.38",
-        "prettier": "^3.2.5",
-        "prisma": "^5.13.0",
-        "prisma-case-format": "^2.2.1",
-        "tailwindcss": "^3.4.3",
-        "ts-node": "^10.9.2",
+        "postcss": "^8.4.39",
+        "prettier": "^3.3.2",
+        "tailwindcss": "^3.4.4",
         "typescript": "5.4.5"
     }
 }
