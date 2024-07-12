@@ -4,8 +4,7 @@ import { PHASE_PRODUCTION_BUILD } from "next/constants";
 
 export async function GET(request: NextRequest) {
     if (process.env.NEXT_PHASE === PHASE_PRODUCTION_BUILD) {
-        console.log(`Current phase is ${process.env.NEXT_PHASE}, skipping pre-rendering`);
-        return new Response(null, { status: 204 });
+        return new Response("OK", { status: 200 });
     }
 
     const responseStream = new TransformStream();
@@ -75,7 +74,7 @@ export async function GET(request: NextRequest) {
         request.signal.onabort = async () => {
             console.log(`Abort signal received`);
             await closeStream();
-            return new Response(null, { status: 204 });
+            return new Response("OK", { status: 200 });
         };
 
         return new Response(responseStream.readable, {
@@ -89,4 +88,9 @@ export async function GET(request: NextRequest) {
         await closeStream();
         return new Response("Internal Server Error", { status: 500 });
     }
+}
+
+// WTF Next.js? Why when i only use GET method, this route is not registered as API route?
+export async function POST() {
+    return new Response("Method Not Allowed", { status: 405 });
 }
