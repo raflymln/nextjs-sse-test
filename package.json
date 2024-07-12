@@ -16,8 +16,7 @@
         "dev": "next dev",
         "build": "next build",
         "start": "next start",
-        "lint": "next lint",
-        "git:init": "git init && git commit --allow-empty -n -m \"Initial commit.\""
+        "lint": "next lint"
     },
     "prettier": "@raflymln/prettier-config",
     "eslintConfig": {

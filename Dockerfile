@@ -1,52 +1,53 @@
-# ---------------------------------
-# Base Image
-# ---------------------------------
-
 # Use Node.js 20 Alpine as the base image
-FROM node:20-alpine AS builder
+FROM mirror.gcr.io/library/node:20-alpine AS base
 
-# Set working directory
+# ----------------------
+# Install dependencies
+# ----------------------
+
+FROM base AS deps
+# Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
+RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
-# Enable corepack for pnpm
-RUN corepack enable
+COPY package.json pnpm-lock.yaml* ./
+RUN corepack enable pnpm && pnpm i --frozen-lockfile
 
-# Install git
-RUN apk add --no-cache git
-
-# Copy package.json and pnpm-lock.yaml
-COPY package.json pnpm-lock.yaml ./
-
+# ----------------------
 # Install dependencies
-RUN pnpm install --frozen-lockfile
+# ----------------------
 
-# Copy the rest of the application code
+FROM base AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Run git:init command
-RUN git config --global user.email "no@thankyou.com" && \
-    git config --global user.name "No Thank You" && \
-    pnpm run git:init
+# Next.js collects completely anonymous telemetry data about general usage.
+# Learn more here: https://nextjs.org/telemetry
+# The following line below disable telemetry during the build.
+ENV NEXT_TELEMETRY_DISABLED 1
 
-# Build the app
-RUN pnpm run build
+RUN corepack enable pnpm && pnpm build
 
-# ---------------------------------
-# Run The Image
-# ---------------------------------
+# ----------------------
+# Prepare the runtime environment
+# ----------------------
 
-# Production image, copy all the files and run next
-FROM node:20-alpine AS runner
-
+FROM base AS runner
 WORKDIR /app
 
-# Copy built assets from the builder stage
-COPY --from=builder /app/.next/standalone ./
-COPY --from=builder /app/.next/static ./.next/static
+ENV NODE_ENV production
 
-# Expose port 3000
+# The following line disable telemetry during runtime.
+ENV NEXT_TELEMETRY_DISABLED 1
+
+# Automatically leverage output traces to reduce image size
+# https://nextjs.org/docs/advanced-features/output-file-tracing
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+
 EXPOSE 3000
-ENV PORT=3000
+ENV PORT 3000
+ENV HOSTNAME "0.0.0.0"
 
-# Start the application
 CMD ["node", "server.js"]
