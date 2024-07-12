@@ -1,7 +1,8 @@
 "use client";
 
 import { mc } from "@/lib/functions";
-import { Fragment, useCallback, useEffect, useRef, useState } from "react";
+
+import { Fragment, useCallback, useEffect, useState } from "react";
 
 export default function Page() {
     const [messages, setMessages] = useState([]);
@@ -47,7 +48,7 @@ export default function Page() {
     }, [messages]);
 
     return (
-        <div className="flex flex-col gap-4 bg-black size-full text-center max-w-screen-md mx-auto text-white p-10">
+        <div className="mx-auto flex size-full max-w-screen-md flex-col gap-4 bg-black p-10 text-center text-white">
             <h1 className="text-4xl font-semibold">Here's some unnecessary quotes for you to read... (probably)</h1>
 
             {messages.map((message, index, elements) => (
@@ -56,11 +57,12 @@ export default function Page() {
                 </Fragment>
             ))}
 
+            {/* eslint-disable-next-line tailwindcss/no-arbitrary-value */}
             <button className={mc("hover:opacity-75 duration-200", isConnectionOpen ? "text-[#f06b6b]" : "text-[#6bf06b]")} onClick={onToggleConnection}>
                 {isConnectionOpen ? "Stop" : "Start"} Quotes
             </button>
 
-            <div className="w-full h-96"></div>
+            <div className="h-96 w-full" />
         </div>
     );
 }
