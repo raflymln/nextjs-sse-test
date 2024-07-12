@@ -2,9 +2,10 @@
 
 import { mc } from "@/lib/functions";
 
-import { Fragment, useCallback, useEffect, useState } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
 
 export default function Page() {
+    const connectionId = useMemo(() => Math.random().toString(36).slice(2), []);
     const [messages, setMessages] = useState([]);
     const [isConnectionOpen, setIsConnectionOpen] = useState(false);
 
@@ -15,15 +16,15 @@ export default function Page() {
     useEffect(() => {
         if (!isConnectionOpen) return;
 
-        const eventSource = new EventSource("/sse");
+        const eventSource = new EventSource(`/sse?connectionId=${connectionId}`);
 
         eventSource.onopen = () => {
-            console.log("Connection established");
+            console.log("[SSE] Connection established");
         };
 
         eventSource.onmessage = (event) => {
             if (event.data === "OK") {
-                console.log("Received OK message");
+                console.log("[SSE] Received OK message");
                 return;
             }
 
@@ -31,16 +32,16 @@ export default function Page() {
         };
 
         eventSource.onerror = (event) => {
-            console.error("Error:", event);
+            console.error("[SSE] Error:", event);
 
             if (eventSource.readyState === EventSource.CLOSED) {
-                console.log("Connection closed");
+                console.log("[SSE] Connection closed because of an error");
                 setIsConnectionOpen(false);
             }
         };
 
         const cleanup = () => {
-            console.log("Closing connection");
+            console.log("[SSE] Closing connection");
             eventSource.close();
             window.removeEventListener("beforeunload", cleanup);
         };
@@ -48,7 +49,7 @@ export default function Page() {
         window.addEventListener("beforeunload", cleanup);
 
         return cleanup;
-    }, [isConnectionOpen]);
+    }, [connectionId, isConnectionOpen]);
 
     useEffect(() => {
         window.scrollTo({
@@ -68,9 +69,11 @@ export default function Page() {
             ))}
 
             {/* eslint-disable-next-line tailwindcss/no-arbitrary-value */}
-            <button className={mc("hover:opacity-75 duration-200", isConnectionOpen ? "text-[#f06b6b]" : "text-[#6bf06b]")} onClick={onToggleConnection}>
+            <button className={mc("hover:opacity-75 duration-200 font-bold text-lg", isConnectionOpen ? "text-[#f06b6b]" : "text-[#6bf06b]")} onClick={onToggleConnection}>
                 {isConnectionOpen ? "Stop" : "Start"} Quotes
             </button>
+
+            <span className="opacity-50">Connection ID: {connectionId}</span>
 
             <div className="h-96 w-full" />
         </div>

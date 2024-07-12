@@ -4,7 +4,14 @@ import { PHASE_PRODUCTION_BUILD } from "next/constants";
 
 export async function GET(request: NextRequest) {
     if (process.env.NEXT_PHASE === PHASE_PRODUCTION_BUILD) {
-        return new Response("OK", { status: 200 });
+        return new Response(null, { status: 204 });
+    }
+
+    const searchParams = request.nextUrl.searchParams;
+    const connectionId = searchParams.get("connectionId");
+
+    if (!connectionId) {
+        return new Response("Connection ID is required", { status: 400 });
     }
 
     const responseStream = new TransformStream();
@@ -18,9 +25,9 @@ export async function GET(request: NextRequest) {
         try {
             const dataString = typeof data === "string" ? data : JSON.stringify(data);
             writer.write(encoder.encode(`data: ${dataString}\n\n`));
-            console.info(`Sending data to client...`);
+            console.info(`[SSE] Sending data to client...`, { connectionId });
         } catch (error) {
-            console.error(`Error sending event:`, error);
+            console.error(`[SSE] Error sending event:`, { connectionId, error });
         }
     };
 
@@ -30,20 +37,18 @@ export async function GET(request: NextRequest) {
 
         try {
             await writer.close();
-
-            console.info(`Client disconnected`);
+            console.info(`[SSE] Client disconnected`, { connectionId });
         } catch (error) {
             // Suppress the error if it's about the stream already being closed
             if (error instanceof Error && error.name === "TypeError" && error.message.includes("WritableStream is closed")) return;
-
-            console.error(`Error closing writer:`, error);
+            console.error(`[SSE] Error closing writer:`, { connectionId, error });
         }
     };
 
     try {
         sendStreamData("OK");
 
-        console.log(`Client connected`);
+        console.log(`[SSE] Client connected`, { connectionId });
 
         const getData = async () => {
             const response = await fetch("https://some-random-api.com/animu/quote");
@@ -53,7 +58,6 @@ export async function GET(request: NextRequest) {
             }
 
             const data = await response.json();
-
             return data.sentence;
         };
 
@@ -72,9 +76,9 @@ export async function GET(request: NextRequest) {
         }, 3000);
 
         request.signal.onabort = async () => {
-            console.log(`Abort signal received`);
+            console.log(`[SSE] Abort signal received from client`, { connectionId });
             await closeStream();
-            return new Response("OK", { status: 200 });
+            return new Response(null, { status: 204 });
         };
 
         return new Response(responseStream.readable, {
@@ -91,6 +95,10 @@ export async function GET(request: NextRequest) {
 }
 
 // WTF Next.js? Why when i only use GET method, this route is not registered as API route?
+// This error/bugs only can be found in production build with Dockerfile
+// ----------------------------------------
+// To reproduce, delete/comment this POST method and build the image and run the container
+// Then try to access the route, it will throw an error mentioning 204 Response constructor error
 export async function POST() {
     return new Response("Method Not Allowed", { status: 405 });
 }
